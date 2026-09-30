@@ -486,8 +486,15 @@ if(AVIF_CODEC_RAV1E_ENABLED)
 
     avif_target_link_library(rav1e::rav1e)
 
+    # Rust's Windows std implementation used by rav1e may reference
+    # NtWriteFile and RtlNtStatusToDosError.
+    if(WIN32)
+        target_link_libraries(avif PUBLIC ntdll)
+    endif()
+
     message(STATUS "libavif: Codec enabled: rav1e (encode)")
-    set(AVIF_PKG_CONFIG_EXTRA_REQUIRES_PRIVATE "${AVIF_PKG_CONFIG_EXTRA_REQUIRES_PRIVATE} rav1e")
+    set(AVIF_PKG_CONFIG_EXTRA_REQUIRES_PRIVATE
+        "${AVIF_PKG_CONFIG_EXTRA_REQUIRES_PRIVATE} rav1e")
 endif()
 
 if(AVIF_CODEC_AVM)

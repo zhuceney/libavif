@@ -1,9 +1,9 @@
 name: Build libavif All Encoders (Windows Static)
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
   release:
-    types: [created]  # 创建 Release 时自动触发
+    types: [created]
 
 permissions:
   contents: write
@@ -33,12 +33,19 @@ jobs:
       - name: Install Meson
         run: pip install meson
 
+      # 只缓存构建产物，避免污染源码和 patch
       - name: Cache ext dependencies
         id: cache-ext
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ext
-          key: windows-ext-${{ hashFiles('ext/*.cmd') }}
+          path: |
+            ext/*/build
+            ext/*/install
+          key: windows-ext-${{ runner.os }}-${{ hashFiles(
+            'ext/*.cmd',
+            'ext/*.sh',
+            'ext/*.patch'
+          ) }}
 
       - name: Build aom
         if: steps.cache-ext.outputs.cache-hit != 'true'
@@ -112,7 +119,7 @@ jobs:
             build/avifdec.exe
 
       - name: Upload to Release
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: |

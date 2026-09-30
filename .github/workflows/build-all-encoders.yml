@@ -33,7 +33,6 @@ jobs:
       - name: Install Meson
         run: pip install meson
 
-      # 只缓存构建产物，避免污染源码和 patch
       - name: Cache ext dependencies
         id: cache-ext
         uses: actions/cache@v4
@@ -41,11 +40,7 @@ jobs:
           path: |
             ext/*/build
             ext/*/install
-          key: windows-ext-${{ runner.os }}-${{ hashFiles(
-            'ext/*.cmd',
-            'ext/*.sh',
-            'ext/*.patch'
-          ) }}
+          key: windows-ext-${{ runner.os }}-${{ hashFiles('ext/*.cmd', 'ext/*.sh', 'ext/*.patch') }}
 
       - name: Build aom
         if: steps.cache-ext.outputs.cache-hit != 'true'
